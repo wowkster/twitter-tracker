@@ -29,16 +29,20 @@ export default async function handler(
         message: 'Missing Authorization Secret! Only should be called from cron job'
     })
 
-    if (req.headers.authorization !== CRON_SECRET) return res.status(403).json({
-        success: false,
-        message: 'Invalid Authorization Secret! Only should be called from cron job'
-    })
+    if (req.headers.authorization !== CRON_SECRET) {
+        console.error('Failed access with secret:', req.headers.authorization)
+
+        return res.status(403).json({
+            success: false,
+            message: 'Invalid Authorization Secret! Only should be called from cron job'
+        })
+    }
 
     /* Create API and DB Clients */
     const client = await clientPromise;
     const db = client.db('twitter_tracker')
 
-    
+
     /* Pull usernames from Database */
     const accounts = await db.collection('twitter_accounts').find({}) as unknown as TwitterAccount[]
 
