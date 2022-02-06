@@ -23,52 +23,58 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse<ResponseData>
 ) {
-    if (!req.headers.authorization) return res.status(401).json({
-        success: false,
-        message: 'Missing Authorization Secret! Only should be called from cron job'
-    })
+    // if (!req.headers.authorization) return res.status(401).json({
+    //     success: false,
+    //     message: 'Missing Authorization Secret! Only should be called from cron job'
+    // })
 
-    if (req.headers.authorization !== CRON_SECRET) {
-        console.error('Failed access with secret:', req.headers.authorization)
+    // if (req.headers.authorization !== CRON_SECRET) {
+    //     console.error('Failed access with secret:', req.headers.authorization)
 
-        return res.status(403).json({
-            success: false,
-            message: 'Invalid Authorization Secret! Only should be called from cron job'
-        })
-    }
+    //     return res.status(403).json({
+    //         success: false,
+    //         message: 'Invalid Authorization Secret! Only should be called from cron job'
+    //     })
+    // }
 
     /* Create API and DB Clients */
     const client = await connectToMongo();
     const db = client.db('twitter_tracker')
 
-
     /* Pull usernames from Database */
-    const accounts = await (await db.collection('twitter_accounts').find({})).toArray() as unknown as TwitterAccount[]
+    const existingAccounts = await (await db.collection('twitter_accounts').find({})).toArray() as unknown as TwitterAccount[]
+    1
+    console.log('Twitter Accounts:', existingAccounts)
 
     // Get Twitter stats of all users
-    const requests = accounts.map(a => a.username).map(async (username) => {
+    const twitterUsers = await Promise.all(existingAccounts.map(a => a.username).map(async (username) => {
         const [twitterAccount] = await twitterClient.accountsAndUsers.usersLookup({ screen_name: username });
 
-        return {
-            username: username,
-            followers: twitterAccount?.followers_count,
-            following: twitterAccount?.friends_count,
-            avatar: twitterAccount?.profile_image_url_https
-        }
-    })
+        return twitterAccount
+    }))
 
-    // Await Promises and remove any that errored
-    const tAccounts = (await Promise.all(requests)).filter(u => {
+    console.log('Twitter API Responses:', twitterUsers)
+
+    // Map the twitter api responses to our data type and remove any that errored
+    const partials = twitterUsers.map(u => {
+        return {
+            username: u.screen_name,
+            followers: u?.followers_count,
+            following: u?.friends_count,
+            avatar: u?.profile_image_url_https
+        }
+    }).filter(u => {
         if (u.followers && u.following) return true
 
         console.error(`[ERROR] User ${u.username} was not resolved!`)
     }) as TwitterAccountPartial[]
 
-    // Remove Duplicates
-    const twitterAccounts = [...new Set(tAccounts)]
+    console.log('Twitter Account Partials:', partials)
 
     /* Update Database */
-    twitterAccounts.map(async (user) => {
+    const time = new Date().getTime() // Sync time across all db entries
+
+    await Promise.all(partials.map(async (user) => {
         await db.collection('twitter_accounts').updateOne({ username: user.username }, {
             $set: {
                 'followers.current': user.followers,
@@ -77,16 +83,18 @@ export default async function handler(
             },
             $push: {
                 'followers.history': {
-                    timestamp: new Date().getTime(),
+                    timestamp: time,
                     value: user.followers
                 },
                 'following.history': {
-                    timestamp: new Date().getTime(),
+                    timestamp: time,
                     value: user.following
                 },
             }
         })
-    })
+    }))
+
+    console.log('Updated Database and awaited all requests')
 
     res.status(200).json({ success: true, message: 'Successfully updated twitter statistics' })
 }
