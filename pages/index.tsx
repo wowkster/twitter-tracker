@@ -83,6 +83,8 @@ export async function getServerSideProps(context: GetSessionParams) {
         delete (a as any)._id
     }
 
+    client.close()
+    console.log('Accounts:', accounts)
 
     return {
         props: {
