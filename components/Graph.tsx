@@ -139,6 +139,7 @@ const Graph: FC<{
             .attr('stroke-linecap', strokeLinecap)
             .attr('stroke-linejoin', strokeLinejoin)
             .attr('stroke-opacity', strokeOpacity)
+            // @ts-ignore
             .attr('d', line(I))
     }, [svg])
 
