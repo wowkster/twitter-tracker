@@ -1,0 +1,123 @@
+.container {
+}
+
+.sidebar {
+    height: 100vh;
+    left: 0;
+    top: 0;
+    z-index: 99;
+    padding-bottom: 50px;
+    position: fixed;
+    width: 18rem;
+    z-index: 999;
+    overflow: hidden;
+    overflow-y: auto;
+    transition: 0.5s;
+    background: transparent;
+    color: #a5adc6;
+}
+
+.logo {
+    height: fit-content;
+    color: #6372dd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.75rem;
+    background-color: white;
+    box-shadow: 0 0 20px rgb(0 0 0 / 5%);
+    
+    margin: 1.5rem;
+    padding: 2rem 0.75rem;
+    border-radius: 0.25rem;
+    font-weight: 500;
+}
+
+.sidebar_menu {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    font-size: 1rem;
+    padding: 0;
+    margin: 2rem;
+}
+
+.sidebar_menu_item {
+    display: grid;
+    grid-template-columns: 2.5rem auto;
+    cursor: pointer;
+    user-select: none;
+}
+
+.sidebar_menu_item > svg {
+    display: flex;
+    align-items: center;
+}
+
+.side_menu_active {
+    color: #63687a;
+}
+
+.content {
+    width: 100%;
+    padding-top: 0px !important;
+    transition: 0.5s;
+    position: relative;
+    min-height: calc(100vh - 5rem);
+}
+
+.header {
+    background-color: white;
+    box-shadow: 0 0 20px rgb(0 0 0 / 5%);
+    margin: 1.5rem;
+    padding: 1.5rem 2rem;
+    height: fit-content;
+    display: grid;
+    grid-template-columns: auto 12rem;
+    border-radius: 0.25rem;
+}
+
+.profile {
+    display: flex;
+    justify-content: end;
+    gap: 1rem;
+    align-items: center;
+}
+
+.profile_pic {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile_pic img {
+    border-radius: 50%;
+    border: 1px solid rgb(0 0 0 / 50%) !important;
+}
+
+.main {
+    background-color: white;
+    box-shadow: 0 0 20px rgb(0 0 0 / 5%);
+    margin: 1.5rem;
+    padding: 1.5rem 2rem;
+    height: fit-content;
+    border-radius: 0.25rem;
+}
+
+.footer {
+    bottom: 0;
+    width: 100%;
+    height: 5rem;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #a5adc6;
+}
+
+.left_pad {
+    padding-left: 18rem;
+}

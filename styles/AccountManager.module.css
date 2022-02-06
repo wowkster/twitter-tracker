@@ -1,0 +1,88 @@
+.button_container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.input {
+    height: 1.5rem;
+    padding: .5rem;
+    height: 100%;
+    width: 100%;
+}
+
+.add_button {
+    border: none;
+    background-color: #24a4f2;
+    color: white;
+    border-radius: .125rem;
+    padding: .5rem 1rem;
+    cursor: pointer;
+    transition: transform 0.2 ease;
+}
+
+.add_button:active {
+    transform: scale(0.98);
+}
+
+.add_button:disabled {
+    background-color: hsl(203, 0%, 55%);
+    cursor: not-allowed;
+}
+
+.twitter_user {
+    display: grid;
+    align-items: center;
+    grid-template-columns: 2rem auto 2rem;
+    position: relative;
+}
+
+.twitter_user:not(:last-child)::after {
+    content: '';
+    height: 2px;
+    width: calc(100% - 1rem);
+    position: absolute;
+    background-color: #dce1ee;
+    bottom: 0;
+    border-radius: 4px;
+    left: 0.5rem;
+}
+
+.twitter_user_icon {
+    color: #24a4f2;
+    transform: translateY(2px);
+    margin-right: 0.5rem;
+}
+
+.twitter_user_username {
+    width: fit-content;
+    display: flex;
+    cursor: pointer;
+}
+
+.twitter_user_username:hover {
+    text-decoration: underline;
+}
+
+.trash_icon {
+    cursor: pointer;
+}
+.trash_icon:hover {
+    color: red;
+}
+
+.error {
+    color: #ff4343;
+    display: grid;
+    grid-template-columns: 2.25rem auto;
+    align-items: center;
+    justify-items:stretch;
+    border: 2px solid #ff4343;
+    padding: 1rem;
+    border-radius: .5rem;
+}
+
+.empty_label {
+    margin: 0;
+    padding: 1rem 0 0 0;
+}
