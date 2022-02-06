@@ -1,22 +1,12 @@
 import React, { FC, useEffect, useRef, useState } from 'react'
 import { select, selectAll, Selection } from 'd3-selection'
-import { scaleLinear, scaleBand, scaleUtc, ScaleTime } from 'd3-scale'
+import { scaleLinear, scaleTime } from 'd3-scale'
 import { extent, map, max, range } from 'd3-array'
 import { axisLeft, axisBottom } from 'd3-axis'
-import { easeBounce, easeElastic, easeQuadIn, easeQuadOut, easeSinOut } from 'd3-ease'
 import 'd3-transition'
 
 import '../styles/Graph.module.css'
 import { CurveFactory, curveLinear, curveMonotoneX, curveNatural, curveStep, line as d3Line } from 'd3-shape'
-
-const dimensions = {
-    width: 800,
-    height: 500,
-    chartWidth: 700,
-    chartHeight: 450,
-    marginLeft: 75,
-    marginTop: 50,
-}
 
 type TimeData = {
     timestamp: number
@@ -51,11 +41,11 @@ const Graph: FC<{
     x = d => d.timestamp, // given d in data, returns the (temporal) x-value
     y = d => d.value, // given d in data, returns the (quantitative) y-value
     isDefined, // for gaps in data
-    curve = curveNatural, // method of interpolation between points
+    curve = curveLinear, // method of interpolation between points
     marginTop = 20, // top margin, in pixels
     marginRight = 30, // right margin, in pixels
     marginBottom = 30, // bottom margin, in pixels
-    marginLeft = 50, // left margin, in pixels
+    marginLeft = 60, // left margin, in pixels
     width = 640, // outer width, in pixels
     height = 400, // outer height, in pixels
     xDomain, // [xmin, xmax]
@@ -64,7 +54,7 @@ const Graph: FC<{
     yRange = [height - marginBottom, marginTop], // [bottom, top]
     yFormat, // a format specifier string for the y-axis
     yLabel = '', // a label for the y-axis
-    color = 'currentColor', // stroke color of line
+    color = 'white', // stroke color of line
     strokeLinecap = 'round', // stroke line cap of the line
     strokeLinejoin = 'round', // stroke line join of the line
     strokeWidth = 1.5, // stroke width of line, in pixels
@@ -92,7 +82,7 @@ const Graph: FC<{
         console.log(svg)
 
         // Construct scales and axes.
-        const xScale = scaleUtc(xDomain as [number, number], xRange)
+        const xScale = scaleTime(xDomain as [number, number], xRange)
         const yScale = scaleLinear(yDomain as [number, number], yRange)
 
         const xAxis = axisBottom(xScale)
@@ -107,11 +97,19 @@ const Graph: FC<{
             .x((_, i) => xScale(X[i]))
             .y((_, i) => yScale(Y[i]))
 
-        svg.append('g')
+        svg.append('rect').attr('width', width).attr('height', height).attr('fill', '#3b76ef').style('rx', '10px')
+
+        const xAxisG = svg
+            .append('g')
             .attr('transform', `translate(0,${height - marginBottom})`)
             .call(xAxis)
 
-        svg.append('g')
+        xAxisG.selectAll('line').style('stroke', 'white')
+        xAxisG.selectAll('path').style('stroke', 'white')
+        xAxisG.selectAll('text').style('fill', 'white')
+
+        const yAxisG = svg
+            .append('g')
             .attr('transform', `translate(${marginLeft},0)`)
             .call(yAxis)
             .call(g => g.select('.domain').remove())
@@ -120,18 +118,23 @@ const Graph: FC<{
                     .selectAll('.tick line')
                     .clone()
                     .attr('x2', width - marginLeft - marginRight)
-                    .attr('stroke-opacity', 0.1)
+                    .attr('stroke-opacity', 0.5)
             )
-            .call(g =>
-                g
-                    .append('text')
-                    .attr('x', -marginLeft)
-                    .attr('y', 10)
-                    .attr('fill', 'currentColor')
-                    .attr('text-anchor', 'start')
-                    .text(yLabel)
-            )
+        yAxisG.selectAll('line').style('stroke', 'white')
+        yAxisG.selectAll('path').style('stroke', 'white')
+        yAxisG.selectAll('text').style('fill', 'white')
 
+        yAxisG.call(g =>
+            g
+                .append('text')
+                .attr('x', -marginLeft)
+                .attr('y', 10)
+                .attr('fill', 'white')
+                .attr('text-anchor', 'start')
+                .text(yLabel)
+        )
+
+        // Draw main Line
         svg.append('path')
             .attr('fill', 'none')
             .attr('stroke', color)
@@ -141,11 +144,23 @@ const Graph: FC<{
             .attr('stroke-opacity', strokeOpacity)
             // @ts-ignore
             .attr('d', line(I))
+
+        // Draw rects on each data point
+        svg.append('g')
+            .selectAll('rect')
+            .data(data)
+            .enter()
+            .append('rect')
+            .attr('width', 5)
+            .attr('height', 5)
+            .attr('x', d => xScale(d.timestamp) - 2.5)
+            .attr('y', d => yScale(d.value) - 2.5)
+            .attr('fill', 'white')
     }, [svg])
 
     return (
         <div>
-            <svg ref={svgRef} width={dimensions.width} height={dimensions.height} />
+            <svg ref={svgRef} width={width} height={height} />
         </div>
     )
 }

@@ -14,7 +14,6 @@ export const twitterClient = new TwitterClient({
     accessTokenSecret: TWITTER_ACCESS_TOKEN_SECRET as string,
 });
 
-
 type ResponseData = {
     message: string
     success: boolean
@@ -44,11 +43,11 @@ export default async function handler(
 
 
     /* Pull usernames from Database */
-    const accounts = await db.collection('twitter_accounts').find({}) as unknown as TwitterAccount[]
+    const accounts = await (await db.collection('twitter_accounts').find({})).toArray() as unknown as TwitterAccount[]
 
     // Get Twitter stats of all users
     const requests = accounts.map(a => a.username).map(async (username) => {
-        const [twitterAccount] = await twitterClient.accountsAndUsers.usersSearch({ q: username });
+        const [twitterAccount] = await twitterClient.accountsAndUsers.usersLookup({ screen_name: username });
 
         return {
             username: username,

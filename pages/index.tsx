@@ -1,4 +1,4 @@
-import type { NextPage } from 'next'
+import type { GetServerSidePropsContext, NextPage } from 'next'
 import Link from 'next/link'
 import { getSession, GetSessionParams, useSession } from 'next-auth/react'
 
@@ -9,6 +9,8 @@ import { AiOutlineTwitter } from 'react-icons/ai'
 import { TwitterAccount } from '../types/twitter'
 import { User } from '../types/user'
 import connectToMongo from '../lib/mongodb'
+import Graph from '../components/Graph'
+import LineChart from '../components/LineChart'
 
 const Home: NextPage<{
     twitterAccounts: TwitterAccount[]
@@ -54,15 +56,28 @@ const TwitterUser: FC<{
                 <p>Followers: {user.followers.current.toLocaleString('en-US')}</p>
                 <p>Following: {user.following.current.toLocaleString('en-US')}</p>
             </div>
-            <div className={styles.twitter_user_graph}>here there will be a graph woah :o</div>
+            <div className={styles.twitter_user_graph}>
+                <LineChart
+                    dataSets={[
+                        {
+                            name: 'Followers',
+                            data: user.followers.history.filter(
+                                e => e.timestamp > new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).getTime()
+                            ),
+                        },
+                    ]}
+                    title='Followers (Last 30 Days)'
+                    height={150}
+                    width={400}
+                />
+  
+            </div>
         </div>
     )
 }
 
-export async function getServerSideProps(context: GetSessionParams) {
-    console.log('Get Index Request')
+export async function getServerSideProps(context: GetServerSidePropsContext) {
     const session = await getSession(context)
-    console.log('Session:', session)
 
     if (!session) {
         return {
@@ -73,25 +88,17 @@ export async function getServerSideProps(context: GetSessionParams) {
         }
     }
 
-    console.log('Opening Mongo Connection')
     const client = await connectToMongo()
-    console.log('MongoClient:', client)
     const db = client.db('twitter_tracker')
-    console.log('MongoDB:', db)
 
     const user = (await db.collection('users').findOne({ email: session.user?.email })) as unknown as User
-    console.log('User:', user)
     const accounts = (await (
         await db.collection('twitter_accounts').find({ username: { $in: user.accounts ?? [] } })
     ).toArray()) as unknown as TwitterAccount[]
-    console.log('Accounts:', accounts)
 
     for (let a of accounts) {
         delete (a as any)._id
     }
-
-    client.close()
-    console.log('Accounts:', accounts)
 
     return {
         props: {
