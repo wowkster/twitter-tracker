@@ -1,9 +1,7 @@
 import { GetServerSidePropsContext } from 'next'
 import { getSession, GetSessionParams, useSession } from 'next-auth/react'
-import { useRouter } from 'next/router'
 import { FC, useState } from 'react'
 import Layout from '../components/Layout'
-import clientPromise from '../lib/mongodb'
 import { TwitterAccount } from '../types/twitter'
 import { User } from '../types/user'
 
@@ -12,6 +10,7 @@ import Link from 'next/link'
 import { AiOutlineTwitter } from 'react-icons/ai'
 import { BsFillTrashFill } from 'react-icons/bs'
 import { MdError } from 'react-icons/md'
+import connectToMongo from '../lib/mongodb'
 
 const AccountDataPage: FC<{
     twitterAccounts: TwitterAccount[]
@@ -128,7 +127,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
         }
     }
 
-    const client = await clientPromise
+    const client = await connectToMongo()
     const db = client.db('twitter_tracker')
 
     const user = (await db.collection('users').findOne({ email: session.user?.email })) as unknown as User

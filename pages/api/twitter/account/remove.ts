@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getSession } from 'next-auth/react';
-import clientPromise from '../../../../lib/mongodb';
+import connectToMongo from '../../../../lib/mongodb';
 import { twitterClient } from '../update';
 
 type Data = {
@@ -24,7 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     })
 
     /* Create API and DB Clients */
-    const client = await clientPromise;
+    const client = await connectToMongo();
     const db = client.db('twitter_tracker')
 
     await db.collection('users').updateOne({ email: session.user?.email }, {

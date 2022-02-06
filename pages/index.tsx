@@ -8,7 +8,7 @@ import { FC } from 'react'
 import { AiOutlineTwitter } from 'react-icons/ai'
 import { TwitterAccount } from '../types/twitter'
 import { User } from '../types/user'
-import clientPromise from '../lib/mongodb'
+import connectToMongo from '../lib/mongodb'
 
 const Home: NextPage<{
     twitterAccounts: TwitterAccount[]
@@ -74,7 +74,7 @@ export async function getServerSideProps(context: GetSessionParams) {
     }
 
     console.log('Opening Mongo Connection')
-    const client = await clientPromise
+    const client = await connectToMongo()
     console.log('MongoClient:', client)
     const db = client.db('twitter_tracker')
     console.log('MongoDB:', db)

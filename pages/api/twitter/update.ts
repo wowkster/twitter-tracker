@@ -2,8 +2,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { TwitterClient } from 'twitter-api-client';
 import { MongoClient } from 'mongodb'
-import clientPromise from '../../../lib/mongodb';
 import { TwitterAccount, TwitterAccountPartial } from '../../../types/twitter';
+import connectToMongo from '../../../lib/mongodb';
 
 export const { MONGO_URI, TWITTER_API_KEY, TWITTER_API_SECRET, TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET, CRON_SECRET } = process.env
 
@@ -39,7 +39,7 @@ export default async function handler(
     }
 
     /* Create API and DB Clients */
-    const client = await clientPromise;
+    const client = await connectToMongo();
     const db = client.db('twitter_tracker')
 
 

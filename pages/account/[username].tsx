@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import { FC } from 'react'
 import Graph from '../../components/Graph'
 import Layout from '../../components/Layout'
+import connectToMongo from '../../lib/mongodb'
 import clientPromise from '../../lib/mongodb'
 import { TwitterAccount } from '../../types/twitter'
 
@@ -55,7 +56,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext & Ct
 
     username = username.substring(1)
 
-    const client = await clientPromise
+    const client = await connectToMongo()
     const db = client.db('twitter_tracker')
 
     const account = (await db.collection('twitter_accounts').findOne({ username })) as unknown as TwitterAccount
