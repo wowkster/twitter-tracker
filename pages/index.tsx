@@ -51,8 +51,8 @@ const TwitterUser: FC<{
                         <AiOutlineTwitter className={styles.twitter_user_icon} size={32} />@{user.username}
                     </h2>
                 </Link>
-                <p>Followers: {user.followers.current.toLocaleString("en-US")}</p>
-                <p>Following: {user.following.current.toLocaleString("en-US")}</p>
+                <p>Followers: {user.followers.current.toLocaleString('en-US')}</p>
+                <p>Following: {user.following.current.toLocaleString('en-US')}</p>
             </div>
             <div className={styles.twitter_user_graph}>here there will be a graph woah :o</div>
         </div>
@@ -60,7 +60,9 @@ const TwitterUser: FC<{
 }
 
 export async function getServerSideProps(context: GetSessionParams) {
+    console.log('Get Index Request')
     const session = await getSession(context)
+    console.log('Session:', session)
 
     if (!session) {
         return {
@@ -71,13 +73,18 @@ export async function getServerSideProps(context: GetSessionParams) {
         }
     }
 
+    console.log('Opening Mongo Connection')
     const client = await clientPromise
+    console.log('MongoClient:', client)
     const db = client.db('twitter_tracker')
+    console.log('MongoDB:', db)
 
     const user = (await db.collection('users').findOne({ email: session.user?.email })) as unknown as User
+    console.log('User:', user)
     const accounts = (await (
         await db.collection('twitter_accounts').find({ username: { $in: user.accounts ?? [] } })
     ).toArray()) as unknown as TwitterAccount[]
+    console.log('Accounts:', accounts)
 
     for (let a of accounts) {
         delete (a as any)._id
